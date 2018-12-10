@@ -19,8 +19,8 @@ $ vagrant box add pisces-ubuntu-trusty64 http://www.cs.princeton.edu/~mshahbaz/p
 Clone the `vagrant` repository.
 
 ```bash
-$ git clone https://github.com/P4-vSwitch/vagrant.git
-$ cd vagrant
+$ git clone https://github.com/diegopedroso/RC-Whiteboxs.git
+$ cd RC-Whiteboxs/Demo-P4/vagrant
 ```
 
 Bring up virtual machines.
