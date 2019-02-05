@@ -40,7 +40,7 @@ $ tar -czvf seu_projeto.tar.gz
 > Copie o arquivo para o mesmo diretório do arquivo deploy.rb, e execute o comando abaixo
 
 ```bash
-$ omf_ec deploy.rb
+$ omf_ec ec.rb
 ```
 > Após o tempo determinado no controlador, o experimentor retornará ao usuário um arquivo (.txt) com as métricas informados no script EC contendo os dados referente ao experimento.
 
