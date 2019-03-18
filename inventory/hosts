@@ -1,0 +1,11 @@
+[all:vars]
+provider=whitebox
+ansible_ssh_port=22
+ansible_ssh_user=whitebox
+
+[whiteboxs]
+whitebox1 192.168.89.195
+whitebox2 192.168.89.196
+whitebox3 192.168.89.197
+whitebox4 192.168.89.198
+whitebox5 192.168.89.199

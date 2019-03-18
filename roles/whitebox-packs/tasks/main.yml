@@ -1,0 +1,160 @@
+---
+# Clone and install p4-hlir
+
+- hosts: whiteboxs
+  tasks:
+
+  - name: Clone and install p4-hlir
+    git: 
+     repo:  https://github.com/p4lang/p4-hlir.git
+     dest: /home/whitebox
+
+  - name: Install P4 Hlir
+    shell: sudo python setup.py install
+
+# Clone and install p4c-behavioral
+
+  - name: Clone and install p4c-behavioral
+    git: 
+     repo:  https://github.com/P4-vSwitch/p4c-behavioral.git
+     dest: /home/whitebox
+
+  - name: Check-OVS
+    shell: git checkout ovs
+
+  - name: Install p4c-behavioral
+    shell: sudo python setup.py install   
+
+# Clone ovs
+
+  - name: Clone ovs
+    git: 
+     repo:  git clone https://github.com/P4-vSwitch/ovs.git
+     dest: /home/whitebox
+
+  - name: Check-OVS
+    shell: cd ovs/
+
+  - name: Check-OVS
+    shell: git checkout p4
+
+  - name: Install p4c-behavioral
+    shell: git submodule update --init  
+
+# Build DPDK
+
+  - name: Build 1
+    shell: cd /home/whitebox/ovs/deps/dpdk
+
+  - name: Build 2
+    shell: patch -p1 -N < ../../setup-scripts/patches/dpdk.patch
+
+  - name: Build 3
+    shell: make -j 2 install T=x86_64-native-linuxapp-gcc
+
+# Setup DPDK-specific environment variables
+
+  - name: Env 1
+    shell: export RTE_SDK=/home/whitebox/ovs/deps/dpdk
+
+  - name: Env 2
+    shell: export RTE_TARGET=x86_64-native-linuxapp-gcc
+
+  - name: Env 3
+    shell: export DPDK_DIR=$RTE_SDK
+
+  - name: Env 4
+    shell: export DPDK_BUILD=$DPDK_DIR/$RTE_TARGET/
+
+# Note: You may want to append these variables in the `~/.bashrc` file. This way you don't have to execute these whenever you
+# open a new terminal.
+
+# Setup DPDK kernel modules
+
+  - name: Kernel modules
+    shell: cd /home/vagrant
+
+  - name: Kernel modules
+    shell: sudo modprobe uio
+
+  - name: Set insmod
+    shell: sudo insmod $RTE_SDK/$RTE_TARGET/kmod/igb_uio.ko
+
+  - name: Def insmod
+    shell: sudo insmod $RTE_SDK/$RTE_TARGET/kmod/rte_kni.ko "lo_mode=lo_mode_ring"
+
+# Add eth1 and eth2 interfaces to DPDK
+
+  - name: Set Interface to DPDK
+    command:  sudo ifconfig eth1 down
+
+  - name:  Set Interface to DPDK
+    command: rsudo $RTE_SDK/tools/dpdk_nic_bind.py -b igb_uio eth1
+
+  - name:  Set Interface to DPDK
+    command: sudo ifconfig eth2 down
+
+  - name:  Set Interface to DPDK
+    command: sudo $RTE_SDK/tools/dpdk_nic_bind.py -b igb_uio eth2
+
+# To view these interfaces run the following command:
+# $RTE_SDK/tools/dpdk_nic_bind.py --status
+
+# Configure Huge Pages
+ 
+  - name: Set Huge Pages
+    shell: cd /home/vagrant
+
+  - name: Set Huge Pages
+    shell: sudo mkdir -p /mnt/huge
+
+  - name: Def Huge Pages
+    shell: (mount | grep hugetlbfs) > /dev/null || sudo mount -t hugetlbfs nodev /mnt/huge
+
+  - name: Def Huge Pages
+    shell: echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+  
+# Note: you can verify if huge pages are configured properly using the following command:
+# grep -i huge /proc/meminfo
+
+  - name: Set Huge Pages
+    shell: cd /home/vagrant
+
+  - name: Set Huge Pages
+    shell: sudo mkdir -p /mnt/huge
+
+  - name: Def Huge Pages
+    shell: (mount | grep hugetlbfs) > /dev/null || sudo mount -t hugetlbfs nodev /mnt/huge
+
+  - name: Def Huge Pages
+    shell: echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+
+# Build OVS (first time only)
+
+  - name: Build OVS PATH
+    shell: /home/whitebox/ovs/boot.sh
+
+  - name: Build OVS
+    shell: ./configure --with-dpdk=$DPDK_BUILD CFLAGS="-g -O2 -Wno-cast-align" \
+            p4inputfile=./include/p4/examples/l2_switch/l2_switch.p4 \
+            p4outputdir=./include/p4/src
+
+  - name: Compile OVS
+    shell: make -j 2
+
+  - name: Def Huge Pages
+    shell: echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+  
+# Create OVS database files and folders
+
+  - name: Def Huge Pages
+    shell: sudo mkdir -p /usr/local/etc/openvswitch
+
+  - name: Def Huge Pages
+    shell: sudo mkdir -p /usr/local/var/run/openvswitch
+
+  - name: Def Huge Pages
+    shell: cd /home/whitebox/ovs/ovsdb/
+
+  - name: Def Huge Pages
+    shell: sudo ./ovsdb-tool create /usr/local/etc/openvswitch/conf.db ../vswitchd/vswitch.ovsschema

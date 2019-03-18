@@ -1,0 +1,6 @@
+#Especifica o ttl cache do endereço de rede
+java_networkaddress_cache_ttl: 3600
+
+#Define qual versão do java será instalada 
+java_version: ""
+
