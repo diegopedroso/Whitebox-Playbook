@@ -4,8 +4,6 @@
   gather_facts: no
   become_user: root
   vars_files:
-    - "../group_vars/sysctl.yml"
-    - "../group_vars/java.yml"
 
   roles:
     - role: ../roles/ubuntu
